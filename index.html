@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether AI // Neural Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked.js для красивого рендеринга Markdown и кода -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #040906;
+      --bg-panel: #07150d;
+      --bg-card: #0a1f14;
+      --emerald-glow: #00ff88;
+      --emerald-accent: #10b981;
+      --emerald-dark: #064e3b;
+      --border-green: rgba(16, 185, 129, 0.2);
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #ecfdf5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Кибер-свечение и скроллбары */
+    .neon-border {
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.08);
+    }
+    
+    .neon-border-active {
+      border: 1px solid #00ff88;
+      box-shadow: 0 0 18px rgba(0, 255, 136, 0.35);
+    }
+
+    .neon-text-glow {
+      text-shadow: 0 0 12px rgba(0, 255, 136, 0.6);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #040906;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #064e3b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    /* Markdown стили в сообщениях */
+    .prose-aether p {
+      margin-bottom: 0.65rem;
+      line-height: 1.6;
+    }
+    .prose-aether p:last-child {
+      margin-bottom: 0;
+    }
+    .prose-aether code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0, 0, 0, 0.4);
+      color: #34d399;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-size: 0.88em;
+    }
+    .prose-aether pre {
+      background: #020603 !important;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 0.8rem 0;
+    }
+    .prose-aether pre code {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      color: #6ee7b7;
+    }
+    .prose-aether ul, .prose-aether ol {
+      margin-left: 1.25rem;
+      margin-bottom: 0.65rem;
+    }
+    .prose-aether li {
+      margin-bottom: 0.25rem;
+    }
+    .prose-aether strong {
+      color: #00ff88;
+      font-weight: 700;
+    }
+
+    /* Пульсация индикатора печати */
+    @keyframes emeraldPulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .pulse-dot-1 { animation: emeraldPulse 1.2s infinite ease-in-out; }
+    .pulse-dot-2 { animation: emeraldPulse 1.2s infinite ease-in-out 0.2s; }
+    .pulse-dot-3 { animation: emeraldPulse 1.2s infinite ease-in-out 0.4s; }
+  </style>
+</head>
+<body class="h-screen flex antialiased select-none">
+
+  <!-- МОБИЛЬНЫЙ ОВЕРЛЕЙ -->
+  <div id="mobileOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-20 hidden lg:hidden"></div>
+
+  <!-- САЙДБАР ЧАТОВ -->
+  <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-72 bg-[#06110a] border-r border-[#10b981]/20 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
+    <!-- Верхняя шапка сайдбара -->
+    <div class="p-4 border-b border-[#10b981]/20 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-500/50 flex items-center justify-center shadow-[0_0_12px_rgba(0,255,136,0.25)]">
+          <svg class="w-5 h-5 text-[#00ff88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <span class="font-extrabold text-sm tracking-widest text-[#00ff88] neon-text-glow">AETHER</span>
+          <p class="text-[10px] text-emerald-500/70 font-mono-code uppercase tracking-wider">Neural Engine</p>
+        </div>
+      </div>
+      <!-- Кнопка закрытия на мобилках -->
+      <button onclick="toggleSidebar()" class="lg:hidden text-emerald-400 p-1 hover:bg-emerald-900/30 rounded">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Кнопка Создания нового чата -->
+    <div class="p-3">
+      <button onclick="createNewChat()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-200 font-semibold text-xs tracking-wider flex items-center justify-center gap-2 transition shadow-[0_0_15px_rgba(0,255,136,0.1)] active:scale-95">
+        <svg class="w-4 h-4 text-[#00ff88]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        НОВЫЙ ЧАТ
+      </button>
+    </div>
+
+    <!-- Список сохранённых чатов -->
+    <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1.5" id="chatListContainer">
+      <!-- Элементы генерируются скриптом -->
+    </div>
+
+    <!-- Футер сайдбара с настройками API ключа -->
+    <div class="p-3 border-t border-[#10b981]/20 bg-[#040a06]">
+      <button onclick="openSettingsModal()" class="w-full flex items-center justify-between p-2 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/30 border border-emerald-500/20 text-xs text-emerald-300 transition">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="font-mono-code font-medium">Supabase Config</span>
+        </div>
+        <span id="configBadge" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ОСНОВНОЙ ЭКРАН ЧАТА -->
+  <main class="flex-1 flex flex-col min-w-0 bg-[#040906] relative">
+    
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ / HEADER -->
+    <header class="h-16 border-b border-emerald-500/20 bg-[#07150d]/80 backdrop-blur-md px-4 flex items-center justify-between z-10">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div>
+          <h1 id="currentChatTitle" class="text-sm md:text-base font-bold text-emerald-200 tracking-wide flex items-center gap-2">
+            <span>Диалог</span>
+          </h1>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
+            <span class="text-[11px] font-mono-code text-[#00ff88]/80 uppercase">Aether 1.5 // Online</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="clearCurrentChatMessages()" title="Очистить историю текущего чата" class="p-2 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/20 text-emerald-400 transition hover:border-emerald-500/50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ОБЛАСТЬ СООБЩЕНИЙ -->
+    <div id="messagesArea" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+      <!-- Сообщения рендерятся тут -->
+    </div>
+
+    <!-- ИНДИКАТОР ПЕЧАТИ (ЛОАДЕР) -->
+    <div id="typingIndicator" class="hidden px-6 pb-2">
+      <div class="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#091a10] border border-emerald-500/30 neon-border">
+        <div class="flex gap-1.5">
+          <div class="w-2 h-2 rounded-full bg-[#00ff88] pulse-dot-1"></div>
+          <div class="w-2 h-2 rounded-full bg-[#00ff88] pulse-dot-2"></div>
+          <div class="w-2 h-2 rounded-full bg-[#00ff88] pulse-dot-3"></div>
+        </div>
+        <span class="text-xs font-mono-code text-emerald-400/90 tracking-wider">Aether генерирует ответ...</span>
+      </div>
+    </div>
+
+    <!-- ПРЕВЬЮ ПРИКРЕПЛЕННОГО МЕДИА -->
+    <div id="mediaPreviewContainer" class="hidden px-4 md:px-6 pt-2">
+      <div class="relative inline-block bg-[#091a10] p-1.5 rounded-xl border border-emerald-500/40 neon-border">
+        <img id="imagePreview" src="" alt="preview" class="h-20 w-auto rounded-lg object-cover">
+        <button onclick="removeAttachedMedia()" class="absolute -top-2 -right-2 bg-emerald-950 border border-emerald-500 text-emerald-300 hover:text-white rounded-full p-1 shadow">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ПОЛЕ ВВОДА СООБЩЕНИЯ -->
+    <div class="p-3 md:p-4 bg-[#07150d] border-t border-emerald-500/20">
+      <form id="chatForm" onsubmit="handleSend(event)" class="max-w-4xl mx-auto flex items-end gap-2 bg-[#040b07] p-2 rounded-2xl border border-emerald-500/30 focus-within:border-[#00ff88] focus-within:shadow-[0_0_20px_rgba(0,255,136,0.2)] transition">
+        
+        <!-- Скрытый инпут для файлов -->
+        <input type="file" id="mediaInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+        
+        <!-- Кнопка прикрепления медиа -->
+        <button type="button" onclick="document.getElementById('mediaInput').click()" title="Прикрепить изображение" class="p-2.5 rounded-xl text-emerald-400 hover:text-[#00ff88] hover:bg-emerald-950/60 transition active:scale-90 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+          </svg>
+        </button>
+
+        <!-- Текстовое поле с автовысотой -->
+        <textarea id="promptInput" rows="1" placeholder="Задай вопрос Aether или отправь картинку..." class="w-full bg-transparent text-emerald-100 placeholder-emerald-600/60 focus:outline-none resize-none py-2 text-sm md:text-base max-h-36" onkeydown="handleKeyDown(event)"></textarea>
+
+        <!-- Кнопка отправки -->
+        <button type="submit" id="sendBtn" class="p-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#00ff88] text-black font-bold transition shadow-[0_0_15px_rgba(0,255,136,0.3)] hover:opacity-95 active:scale-95 flex-shrink-0">
+          <svg class="w-5 h-5 transform rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+          </svg>
+        </button>
+      </form>
+      <div class="text-center mt-2">
+        <span class="text-[10px] font-mono-code text-emerald-600/70">Aether Engine v1.5 Flash // Direct Supabase Edge Architecture</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- МОДАЛКА НАСТРОЕК SUPABASE -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#07150d] border border-emerald-500/40 neon-border rounded-2xl w-full max-w-md p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+        <h3 class="text-emerald-300 font-bold tracking-wider font-mono-code text-sm">НАСТРОЙКИ СВЯЗКИ SUPABASE</h3>
+        <button onclick="closeSettingsModal()" class="text-emerald-500 hover:text-emerald-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-emerald-400 font-mono-code mb-1">SUPABASE PROJECT URL</label>
+          <input type="text" id="settingUrl" class="w-full bg-[#040906] border border-emerald-500/30 rounded-lg p-2.5 text-emerald-200 font-mono-code focus:border-[#00ff88] focus:outline-none" value="https://wcsnepbgogiwjgobtdjy.supabase.co">
+        </div>
+        <div>
+          <label class="block text-emerald-400 font-mono-code mb-1">SUPABASE ANON KEY (PUBLIC)</label>
+          <input type="text" id="settingAnonKey" placeholder="eyJhbGciOiJIUzI1NiIsIn..." class="w-full bg-[#040906] border border-emerald-500/30 rounded-lg p-2.5 text-emerald-200 font-mono-code focus:border-[#00ff88] focus:outline-none">
+          <p class="text-[10px] text-emerald-600 mt-1">Ключ `anon public` из вкладки Project Settings -> API. Он безопасно хранится прямо в localStorage твоего браузера.</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-emerald-500/20">
+        <button onclick="saveSettings()" class="px-4 py-2 rounded-lg bg-[#00ff88] text-black font-bold text-xs font-mono-code hover:bg-emerald-400 transition shadow-[0_0_12px_rgba(0,255,136,0.3)]">
+          СОХРАНИТЬ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЛОГИКА ПРИЛОЖЕНИЯ -->
+  <script>
+    // КОНФИГУРАЦИЯ
+    const DEFAULT_SUPABASE_URL = "https://wcsnepbgogiwjgobtdjy.supabase.co";
+    let supabaseUrl = localStorage.getItem("aether_supabase_url") || DEFAULT_SUPABASE_URL;
+    let supabaseAnonKey = localStorage.getItem("aether_supabase_anon") || "";
+
+    // ХРАНИЛИЩЕ ЧАТОВ
+    let chats = JSON.parse(localStorage.getItem("aether_chats") || "[]");
+    let currentChatId = localStorage.getItem("aether_active_chat_id") || null;
+
+    // ВРЕМЕННОЕ МЕДИА
+    let attachedImageData = null; // { mimeType, data (base64) }
+
+    // ИНИЦИАЛИЗАЦИЯ
+    window.addEventListener("DOMContentLoaded", () => {
+      checkAnonKeyBadge();
+      if (!chats || chats.length === 0) {
+        createNewChat(false);
+      } else {
+        if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
+          currentChatId = chats[0].id;
+        }
+        renderChatList();
+        renderMessages();
+      }
+
+      // Авто-рост инпута
+      const textarea = document.getElementById("promptInput");
+      textarea.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = (this.scrollHeight) + "px";
+      });
+    });
+
+    function checkAnonKeyBadge() {
+      const badge = document.getElementById("configBadge");
+      if (!supabaseAnonKey) {
+        badge.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+      } else {
+        badge.className = "w-2 h-2 rounded-full bg-[#00ff88]";
+      }
+    }
+
+    // УПРАВЛЕНИЕ САЙДБАРОМ
+    function toggleSidebar() {
+      const sb = document.getElementById("sidebar");
+      const ov = document.getElementById("mobileOverlay");
+      sb.classList.toggle("-translate-x-full");
+      ov.classList.toggle("hidden");
+    }
+
+    // УПРАВЛЕНИЕ ЧАТАМИ
+    function createNewChat(shouldFocus = true) {
+      const newChat = {
+        id: "chat_" + Date.now(),
+        title: "Новый сеанс",
+        createdAt: new Date().toISOString(),
+        messages: [
+          {
+            role: "bot",
+            text: "Приветствую в системе **Aether**. Движок запущен, все сенсоры в норме. Чем могу помочь сегодня? Можешь написать задачу или закинуть медиафайл на анализ.",
+            time: formatTime(new Date())
+          }
+        ]
+      };
+
+      chats.unshift(newChat);
+      currentChatId = newChat.id;
+      saveChatsToStorage();
+      renderChatList();
+      renderMessages();
+
+      if (shouldFocus) {
+        document.getElementById("promptInput").focus();
+        if (window.innerWidth < 1024) toggleSidebar();
+      }
+    }
+
+    function selectChat(id) {
+      currentChatId = id;
+      localStorage.setItem("aether_active_chat_id", currentChatId);
+      renderChatList();
+      renderMessages();
+      if (window.innerWidth < 1024) toggleSidebar();
+    }
+
+    function deleteChat(id, event) {
+      event.stopPropagation();
+      chats = chats.filter(c => c.id !== id);
+      if (chats.length === 0) {
+        createNewChat(false);
+      } else {
+        if (currentChatId === id) {
+          currentChatId = chats[0].id;
+        }
+        saveChatsToStorage();
+        renderChatList();
+        renderMessages();
+      }
+    }
+
+    function saveChatsToStorage() {
+      localStorage.setItem("aether_chats", JSON.stringify(chats));
+      localStorage.setItem("aether_active_chat_id", currentChatId);
+    }
+
+    function getCurrentChat() {
+      return chats.find(c => c.id === currentChatId);
+    }
+
+    function clearCurrentChatMessages() {
+      const chat = getCurrentChat();
+      if (!chat) return;
+      chat.messages = [
+        {
+          role: "bot",
+          text: "История очищена. Жду новых инструкций.",
+          time: formatTime(new Date())
+        }
+      ];
+      saveChatsToStorage();
+      renderMessages();
+    }
+
+    // РЕНДЕР СПИСКА ЧАТОВ
+    function renderChatList() {
+      const container = document.getElementById("chatListContainer");
+      container.innerHTML = "";
+
+      chats.forEach(chat => {
+        const isActive = chat.id === currentChatId;
+        const div = document.createElement("div");
+        div.onclick = () => selectChat(chat.id);
+        div.className = `group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition text-xs select-none ${
+          isActive 
+            ? "bg-[#0c2918] border border-emerald-500/50 neon-border-active text-emerald-100" 
+            : "hover:bg-emerald-950/40 text-emerald-400/80 border border-transparent"
+        }`;
+
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0 pr-2">
+            <svg class="w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#00ff88]' : 'text-emerald-600'}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="truncate font-medium">${escapeHtml(chat.title)}</span>
+          </div>
+          <button onclick="deleteChat('${chat.id}', event)" class="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 text-emerald-600 transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+
+      const current = getCurrentChat();
+      if (current) {
+        document.getElementById("currentChatTitle").innerText = current.title;
+      }
+    }
+
+    // РЕНДЕР СООБЩЕНИЙ
+    function renderMessages() {
+      const container = document.getElementById("messagesArea");
+      container.innerHTML = "";
+
+      const chat = getCurrentChat();
+      if (!chat) return;
+
+      chat.messages.forEach(msg => {
+        const isUser = msg.role === "user";
+        const wrapper = document.createElement("div");
+        wrapper.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-4xl mx-auto`;
+
+        let mediaHtml = "";
+        if (msg.image) {
+          mediaHtml = `
+            <div class="mb-2 max-w-xs rounded-xl overflow-hidden border border-emerald-500/30">
+              <img src="data:${msg.image.mimeType};base64,${msg.image.data}" class="w-full h-auto object-cover" alt="attachment">
+            </div>
+          `;
+        }
+
+        // Рендерим markdown для бота, простой текст для юзера
+        const parsedContent = isUser 
+          ? escapeHtml(msg.text).replace(/\n/g, '<br>') 
+          : marked.parse(msg.text || "");
+
+        wrapper.innerHTML = `
+          <div class="flex items-start gap-2.5 max-w-[88%] md:max-w-[78%] ${isUser ? 'flex-row-reverse' : 'flex-row'}">
+            <!-- Аватарка -->
+            <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-mono-code font-bold ${
+              isUser 
+                ? 'bg-emerald-700 text-emerald-100 border border-emerald-500/40' 
+                : 'bg-emerald-950 text-[#00ff88] border border-emerald-500/60 neon-border'
+            }">
+              ${isUser ? 'U' : 'Æ'}
+            </div>
+
+            <!-- Тело сообщения -->
+            <div class="rounded-2xl p-3.5 md:p-4 text-sm ${
+              isUser 
+                ? 'bg-[#0b2416] text-emerald-100 border border-emerald-500/40 rounded-tr-none shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
+                : 'bg-[#07170e] text-emerald-200 border border-emerald-500/30 rounded-tl-none prose-aether neon-border'
+            }">
+              ${mediaHtml}
+              <div>${parsedContent}</div>
+              <div class="mt-1 text-[10px] font-mono-code text-right text-emerald-600/70 select-none">${msg.time}</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(wrapper);
+      });
+
+      scrollMessagesToBottom();
+    }
+
+    function scrollMessagesToBottom() {
+      const area = document.getElementById("messagesArea");
+      area.scrollTop = area.scrollHeight;
+    }
+
+    // ОБРАБОТКА ВВОДА КЛАВИАТУРЫ
+    function handleKeyDown(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend(e);
+      }
+    }
+
+    // ОБРАБОТКА МЕДИА
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        alert("Пожалуйста, выбери файл изображения (JPG, PNG, WEBP).");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const fullBase64 = evt.target.result;
+        const mimeType = file.type;
+        // Извлекаем чистый base64 без заголовка data:...;base64,
+        const base64Data = fullBase64.split(",")[1];
+
+        attachedImageData = {
+          mimeType: mimeType,
+          data: base64Data
+        };
+
+        document.getElementById("imagePreview").src = fullBase64;
+        document.getElementById("mediaPreviewContainer").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeAttachedMedia() {
+      attachedImageData = null;
+      document.getElementById("mediaInput").value = "";
+      document.getElementById("mediaPreviewContainer").classList.add("hidden");
+    }
+
+    // ОТПРАВКА СООБЩЕНИЯ
+    async function handleSend(e) {
+      if (e) e.preventDefault();
+
+      const input = document.getElementById("promptInput");
+      const text = input.value.trim();
+
+      if (!text && !attachedImageData) return;
+
+      // Проверка ключа Anon Key
+      if (!supabaseAnonKey) {
+        openSettingsModal();
+        return;
+      }
+
+      const chat = getCurrentChat();
+      if (!chat) return;
+
+      // Авто-генерация заголовка для первого сообщения
+      if (chat.messages.length <= 1 && text) {
+        chat.title = text.slice(0, 24) + (text.length > 24 ? "..." : "");
+      }
+
+      // Сохраняем месседж пользователя
+      const userMessage = {
+        role: "user",
+        text: text,
+        image: attachedImageData ? { ...attachedImageData } : null,
+        time: formatTime(new Date())
+      };
+
+      chat.messages.push(userMessage);
+      saveChatsToStorage();
+      renderChatList();
+      renderMessages();
+
+      // Очищаем форму
+      const currentPrompt = text;
+      const currentMedia = attachedImageData ? { ...attachedImageData } : null;
+      input.value = "";
+      input.style.height = "auto";
+      removeAttachedMedia();
+
+      // Врубаем лоадер
+      showTyping(true);
+
+      try {
+        const functionEndpoint = `${supabaseUrl.replace(/\/+$/, '')}/functions/v1/chat`;
+
+        const response = await fetch(functionEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseAnonKey}`,
+            "apikey": supabaseAnonKey
+          },
+          body: JSON.stringify({
+            prompt: currentPrompt,
+            image: currentMedia ? {
+              inlineData: {
+                mimeType: currentMedia.mimeType,
+                data: currentMedia.data
+              }
+            } : null
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const replyText = data.reply || "Aether ответил пустым сообщением.";
+
+        // Добавляем ответ бота
+        chat.messages.push({
+          role: "bot",
+          text: replyText,
+          time: formatTime(new Date())
+        });
+
+      } catch (err) {
+        console.error("Aether Gateway Error:", err);
+        chat.messages.push({
+          role: "bot",
+          text: `⚠️ **Сбой нейрошлюза:** \`${err.message}\`.\n\nПроверь, активна ли Edge Function \`chat\` в Supabase и вставлен ли правильный \`anon public\` ключ в настройках (шестеренка внизу сайдбара).`,
+          time: formatTime(new Date())
+        });
+      } finally {
+        showTyping(false);
+        saveChatsToStorage();
+        renderMessages();
+      }
+    }
+
+    function showTyping(state) {
+      const el = document.getElementById("typingIndicator");
+      if (state) {
+        el.classList.remove("hidden");
+      } else {
+        el.classList.add("hidden");
+      }
+      scrollMessagesToBottom();
+    }
+
+    // МОДАЛЬНОЕ ОКНО НАСТРОЕК
+    function openSettingsModal() {
+      document.getElementById("settingUrl").value = supabaseUrl;
+      document.getElementById("settingAnonKey").value = supabaseAnonKey;
+      document.getElementById("settingsModal").classList.remove("hidden");
+    }
+
+    function closeSettingsModal() {
+      document.getElementById("settingsModal").classList.add("hidden");
+    }
+
+    function saveSettings() {
+      const urlInput = document.getElementById("settingUrl").value.trim();
+      const keyInput = document.getElementById("settingAnonKey").value.trim();
+
+      if (urlInput) {
+        supabaseUrl = urlInput;
+        localStorage.setItem("aether_supabase_url", supabaseUrl);
+      }
+      if (keyInput) {
+        supabaseAnonKey = keyInput;
+        localStorage.setItem("aether_supabase_anon", supabaseAnonKey);
+      }
+
+      checkAnonKeyBadge();
+      closeSettingsModal();
+    }
+
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    function formatTime(d) {
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
